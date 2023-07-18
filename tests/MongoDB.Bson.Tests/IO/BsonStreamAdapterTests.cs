@@ -24,6 +24,7 @@ using MongoDB.Bson.IO;
 using MongoDB.TestHelpers.XunitExtensions;
 using Moq;
 using Xunit;
+using System.Buffers.Binary;
 
 namespace MongoDB.Bson.Tests
 {
@@ -784,7 +785,8 @@ namespace MongoDB.Bson.Tests
             double value
             )
         {
-            var bytes = BitConverter.GetBytes(value);
+            var bytes = new byte[8];
+            BinaryPrimitivesCompat.WriteDoubleLittleEndian(bytes, value);
             var stream = new MemoryStream(bytes);
             var subject = new BsonStreamAdapter(stream);
 
@@ -824,7 +826,8 @@ namespace MongoDB.Bson.Tests
             [Values(-1, 0, 1, int.MaxValue, int.MinValue)]
             int value)
         {
-            var bytes = BitConverter.GetBytes(value);
+            var bytes = new byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(bytes, value);
             var stream = new MemoryStream(bytes);
             var subject = new BsonStreamAdapter(stream);
 
@@ -864,7 +867,8 @@ namespace MongoDB.Bson.Tests
             [Values(-1, 0, 1, long.MaxValue, long.MinValue)]
             long value)
         {
-            var bytes = BitConverter.GetBytes(value);
+            var bytes = new byte[8];
+            BinaryPrimitives.WriteInt64LittleEndian(bytes, value);
             var stream = new MemoryStream(bytes);
             var subject = new BsonStreamAdapter(stream);
 
@@ -1410,7 +1414,8 @@ namespace MongoDB.Bson.Tests
         {
             var stream = new MemoryStream();
             var subject = new BsonStreamAdapter(stream);
-            var expectedBytes = BitConverter.GetBytes(value);
+            var expectedBytes = new byte[8];
+            BinaryPrimitivesCompat.WriteDoubleLittleEndian(expectedBytes, value);
 
             subject.WriteDouble(value);
 
@@ -1462,7 +1467,8 @@ namespace MongoDB.Bson.Tests
         {
             var stream = new MemoryStream();
             var subject = new BsonStreamAdapter(stream);
-            var expectedBytes = BitConverter.GetBytes(value);
+            var expectedBytes = new byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(expectedBytes, value);
 
             subject.WriteInt32(value);
 
@@ -1502,7 +1508,8 @@ namespace MongoDB.Bson.Tests
         {
             var stream = new MemoryStream();
             var subject = new BsonStreamAdapter(stream);
-            var expectedBytes = BitConverter.GetBytes(value);
+            var expectedBytes = new byte[8];
+            BinaryPrimitives.WriteInt64LittleEndian(expectedBytes, value);
 
             subject.WriteInt64(value);
 
@@ -1611,7 +1618,9 @@ namespace MongoDB.Bson.Tests
             var subject = new BsonStreamAdapter(stream);
             var valueLength = ((tempUtf8LegacySize - 5) / 3) + delta;
             var value = new string('a', valueLength);
-            var expectedBytes = BitConverter.GetBytes(valueLength + 1)
+            var bytes = new byte[4];
+            BinaryPrimitives.WriteInt32LittleEndian(bytes, valueLength + 1);
+            var expectedBytes = bytes
                 .Concat(Enumerable.Repeat<byte>(97, valueLength))
                 .Concat(new byte[] { 0 })
                 .ToArray();

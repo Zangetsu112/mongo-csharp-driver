@@ -305,7 +305,6 @@ namespace MongoDB.Bson.IO
 
         /// <inheritdoc/>
         public override double ReadDouble()
-
         {
             ThrowIfDisposed();
             this.ReadBytes(_temp, 0, 8);
