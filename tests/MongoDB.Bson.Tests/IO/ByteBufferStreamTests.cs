@@ -557,8 +557,8 @@ namespace MongoDB.Bson.Tests.IO
         {
             var value = Decimal128.Parse(valueString);
             var bytes = new byte[16];
-            Buffer.BlockCopy(BitConverter.GetBytes(value.GetIEEELowBits()), 0, bytes, 0, 8);
-            Buffer.BlockCopy(BitConverter.GetBytes(value.GetIEEEHighBits()), 0, bytes, 8, 8);
+            BinaryPrimitives.WriteUInt64LittleEndian(new Span<byte>(bytes, 0, 8), value.GetIEEELowBits());
+            BinaryPrimitives.WriteUInt64LittleEndian(new Span<byte>(bytes, 8, 8), value.GetIEEEHighBits());
             var subject = CreateSubject(bytes, numberOfChunks);
 
             var result = subject.ReadDecimal128();
@@ -1383,8 +1383,8 @@ namespace MongoDB.Bson.Tests.IO
             var subject = CreateSubject();
             var mockBuffer = Mock.Get(subject.Buffer);
             var expectedBytes = new byte[16];
-            Buffer.BlockCopy(BitConverter.GetBytes(value.GetIEEELowBits()), 0, expectedBytes, 0, 8);
-            Buffer.BlockCopy(BitConverter.GetBytes(value.GetIEEEHighBits()), 0, expectedBytes, 8, 8);
+            BinaryPrimitives.WriteUInt64LittleEndian(new Span<byte>(expectedBytes, 0, 8), value.GetIEEELowBits());
+            BinaryPrimitives.WriteUInt64LittleEndian(new Span<byte>(expectedBytes, 8, 8), value.GetIEEEHighBits());
 
             subject.WriteDecimal128(value);
 
